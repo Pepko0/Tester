@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyszukiwarka pytań</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wyszukiwarka pytań</h1>
+    <input type="text" id="searchInput" placeholder="Wprowadź słowo kluczowe..." onkeyup="searchQuestions()">
+    <div id="questionsContainer"></div>
+
+    <script>
+        const questions = [
+            {
+                question: "Co to jest obiekt dynamiczny?",
+                answers: {
+                    a: "to obiekt, który tworzymy i usuwamy określoną instrukcją w dowolnym czasie",
+                }
+            },
+            {
+                question: "Co to jest obiekt automatyczny?",
+                answers: {
+                    a: "to obiekt, który (jak zmienna automatyczna) tworzony jest w momencie deklaracji i usuwany przy wyjściu z zakresu"
+                }
+            },
+            {
+                question: "Co to jest obiekt?",
+                answers: {
+                    a: "jest to programowa realizacja rzeczy, pojęć, bytów, które widzimy dookoła",
+                    b: "jest to zmienna w pamięci, która powstaje z klasy",
+                    c: "jest to pewnego rodzaju zmienna (serwis), która może świadczyć usługi"
+                }
+            },
+            {
+                question: "Co to jest kopia głęboka?",
+                answers: {
+                    d: "kopia, której pola-referencje wskazują na stworzone kopie obiektów wskazywanych przez pola-referencje obiektu-oryginału"
+                }
+            },
+            {
+                question: "Co to jest kopia płytka?",
+                answers: {
+                    b: "dokładna kopia bitowa innego obiektu",
+                    e: "kopia, której pola-referencje wskazują na te same obiekty co pola-referencje obiektu-oryginału"
+                }
+            },
+            {
+                question: "Co to jest konstruktor kopiujący?",
+                answers: {
+                    a: "konstruktor który jako jedyny parametr pobiera obiekt tej samej klasy co obiekt tworzony"
+                }
+            },
+            {
+                question: "Gdzie dostępne są składowe prywatne?",
+                answers: {
+                    b: "wewnątrz tej klasy",
+                    f: "m.in. w prywatnych składowych klasy"
+                }
+            },
+            {
+                question: "Czy implementacja klasy może/powinna się zmieniać?",
+                answers: {
+                    c: "tak, bo kod kody programów korzystających z tej klasy nie wymagają zmiany aby przystosować je do pracy z nową wersją klasy (co najwyżej powtórnej kompilacji i linkowania)"
+                }
+            },
+            {
+                question: "Czy interfejs klasy powinien być publiczny czy prywatny?",
+                answers: {
+                    d: "powinien być publiczny!"
+                }
+            },
+            {
+                question: "Czy operatory można przeciążać?",
+                answers: {
+                    c: "w niektórych językach"
+                }
+            },
+            {
+                question: "Jak realizuje się kompozycja w kodzie?",
+                answers: {
+                    f: "w klasie kompozytu umieszcza się pole obiektowe klasy komponentu"
+                }
+            },
+            {
+                question: "Do czego służy technika kompozycji?",
+                answers: {
+                    b: "do łatwiejszego tworzenia nowych klas z użyciem klas istniejących"
+                }
+            },
+            {
+                question: "Czy konstruktory (destruktory) dziedziczą się?",
+                answers: {
+                    c: "nie"
+                }
+            },
+            {
+                question: "Jak wygląda w pamięci obiekt klasy dziedziczącej?",
+                answers: {
+                    a: "zawiera w sobie „mały” obiekt klasy bazowej",
+                    c: "nie jest mniejszy od obiektu klasy bazowej"
+                }
+            },
+            {
+                question: "Jak w języku UML oznacza się dziedziczenie?",
+                answers: {
+                    b: "pustą strzałką"
+                }
+            },
+            {
+                question: "Czy rzutowanie w górę jest zawsze bezpieczne?",
+                answers: {
+                    a: "tak"
+                }
+            },
+            {
+                question: "Jakie są negatywne konsekwencje rzutowania w górę?",
+                answers: {
+                    d: "tracimy (chwilowo) dostęp do informacji zapisanej w warstwie klasy pochodnej"
+                }
+            },
+            {
+                question: "W jakiej fazie: kompilacji czy uruchomienia programu działa mechanizm RTTI?",
+                answers: {
+                    b: "w fazie uruchomienia programu"
+                }
+            },
+            {
+                question: "Jaka wiedza jest potrzebna do wiązania późnego?",
+                answers: {
+                    c: "typ obiektu, z którego wywoływana jest metoda"
+                }
+            },
+            {
+                question: "Jaka wiedza jest potrzebna do wiązania wczesnego?",
+                answers: {
+                    a: "typ wskazania na obiekt z którego wywoływana jest metoda"
+                }
+            },
+            {
+                question: "Jakie metody wiązane są późno?",
+                answers: {
+                    b: "metody wirtualne"
+                }
+            },
+            {
+                question: "Czy można definiować puste typy interfejsowe?",
+                answers: {
+                    a: "tak, to tak zwane typy interfejsowe znacznikowe (markery)"
+                }
+            },
+            {
+                question: "Czy typ interfejsowy może dziedziczyć z wielu typów interfejsowych?",
+                answers: {
+                    c: "tak"
+                }
+            },
+            {
+                question: "Jakie są skutki implementowania przez klasę typu interfejsowego?",
+                answers: {
+                    a: "musi ona podać definicje wszystkich metod typu interfejsowego, jeśli nie chce być abstrakcyjna",
+                    e: "referencja na obiekt tej klasy może być zapisana w zmiennej referencyjnej typu interfejsowego",
+                    b: "dziedziczy z niego typ"
+                }
+            },
+            {
+                question: "Do czego służy instrukcja 'try-catch'?",
+                answers: {
+                    c: "do przechwytywania i obsługi wyjątków"
+                }
+            },
+            {
+                question: "Jakie jest skutek wyrzucenia wyjątku dla modułu-zleceniobiorcy?",
+                answers: {
+                    b: "kończy on natychmiast swoje działanie"
+                }
+            },
+            {
+                question: "Jaki jest skutek odebrania wyjątku przez moduł-zleceniodawcę?",
+                answers: {
+                    d: "kończy on natychmiast swoje działanie, jeśli nie przechwyci go odpowiednią instrukcją 'try-catch'"
+                }
+            },
+            {
+                question: "Jak wywołać metodę?",
+                answers: {
+                    b: "tak jak funkcję, ale określając obiekt, który ją wykona"
+                }
+            },
+            {
+                question: "Czy w programie obiektowym można używać pętli?",
+                answers: {
+                    c: "tak, tak samo jak w programie strukturalnym"
+                }
+            },
+            {
+                question: "Co to jest metoda?",
+                answers: {
+                    a: "operacja oferowana i wykonywana przez obiekt"
+                }
+            },
+            {
+                question: "Ile konstruktorów może mieć klasa?",
+                answers: {
+                    c: "wiele o tej samej nazwie, pod warunkiem, że mają różne listy parametrów"
+                }
+            },
+            {
+                question: "Co to jest konstruktor domyślny?",
+                answers: {
+                    a: "konstruktor dodany automatycznie do klasy, jeśli nie ma ona żadnego konstruktora",
+                    c: "konstruktor bezparametrowy"
+                }
+            },
+            {
+                question: "Gdzie dostępne są składowe publiczne?",
+                answers: {
+                    b: "wszędzie w programie",
+                    e: "m.in. w prywatnych składowych klasy"
+                }
+            },
+            {
+                question: "Co to są metody dostępowe?",
+                answers: {
+                    a: "metody, których głównym celem jest czytanie i pisanie pól klasy / obiektu"
+
+                }
+            },
+            {
+                question: "Czy implementacja klasy powinna być publiczna czy prywatna?",
+                answers: {
+                    b: "powininna być prywatna!"
+                }
+            },
+            {
+                question: "Czym muszą różnić przeciążane metody/funkcje?",
+                answers: {
+                    b: "liczbą parametrów, a jeśli ich liczba jest taka sama, to ich typami"
+                }
+            },
+            {
+                question: "Jakie relacje między klasami reprezentuje kompozycja?",
+                answers: {
+                    b: "wchodzi w skład",
+                    c: "„jest zbudowana z”",
+                    d: "„zawiera”"
+                }
+            },
+            {
+                question: "Do czego służy metoda toString/ToString?",
+                answers: {
+                    b: "do zwrócenia tekstowego opisu obiektu"
+
+                }
+            },
+            {
+                question: "Jaki konstruktor wywołuje się przed konstruktorem klasy dziedziczącej?",
+                answers: {
+                    b: "konstruktor klasy bazowej",
+                    c: "konstruktor klasy Object (w C# Javie)"
+
+                }
+            },
+            {
+                question: "Jaką relacje między klasami modeluje dziedziczenie?",
+                answers: {
+                    c: "„jest (rodzajem)”"
+                }
+            },
+            {
+                question: "Czy Kwadrat powinien dziedziczyć z Prostokąta, czy Prostokąt z Kwadratu?",
+                answers: {
+                    c: "Kwadrat powinien dziedziczyć z Prostokąta, bo każdy Kwadrat jest też Prostokątem"
+                }
+            },
+            {
+                question: "Czy rzutować w dół można między klasami niezwiązanymi relacją dziedziczenia?",
+                answers: {
+                    c: "nie"
+                }
+            },
+            {
+                question: "Jakie są konsekwencje dziedziczenia typu?",
+                answers: {
+                    c: "klasa pochodna ma więcej niż jeden typ",
+                    d: "możliwe jest rzutowanie w górę"
+                }
+            },
+            {
+                question: "Jakie są korzyści z rzutowania w górę?",
+                answers: {
+                    d: "można tworzyć uniwersalne kolekcje spokrewnionych obiektów"
+                }
+            },
+            {
+                question: "Kiedy odbywa się wczesne wiązanie metod?",
+                answers: {
+                    d: "w trakcie kompilacji programu"
+                }
+            },
+            {
+                question: "Jakie metody wiązane są wcześnie?",
+                answers: {
+                    d: "metody statyczne",
+                    e: "zwykłe metody (niewirtualne)"
+                }
+            },
+            {
+                question: "Jakie metody wykonują się szybciej – wirtualnie czy niewirtualne?",
+                answers: {
+                    e: "metody niewirtualne"
+                }
+            },
+            {
+                question: "Czy klasa może implementować wiele typów interfejsowych?",
+                answers: {
+                    e: "tak, ale musi podać definicje wszystkich metod wszystkich implementowanych typów interfejsowych, jeśli nie chcemy, aby była abstrakcyjna"
+                }
+            },
+            {
+                question: "Czy typ interfejsowy może mieć konstruktor?",
+                answers: {
+                    e: "nie"
+                }
+            },
+            {
+                question: "Dlaczego pełne wielodziedziczenie jest rzadko stosowane?",
+                answers: {
+                    e: "ponieważ sprawia dużo problemów w zastosowaniu (przesunięte w stosunku do klasy dziedziczącej wskazania na wiele obiektów klas bazowych, wielokrotne dziedziczenie tej samej klasy z różnych ścieżek dziedziczenia, ...)"
+                }
+            },
+            {
+                question: "Przy użyciu konstrukcji  try {…} catch (Exception e) {…} finally {…}",
+                answers: {
+                    e: "kod w sekcji catch wykonuje się tylko jeśli zostanie wyrzucony wyjątek w sekcji try)",
+                    f: "kod w sekcji finally wykonuje się niezależnie od tego czy w try został wyrzucony wyjątek czy nie"
+                }
+            },
+            {
+                question: "Jak moduł-zleceniodawca może się „bronić” przed wyjątkami?",
+                answers: {
+                    f: "stosując instrukcję 'try-catch'"
+                }
+            },
+            {
+                question: "Kiedy obiekt wyjątku zostaje przekazany do modułu-zleceniodawcy?",
+                answers: {
+                    f: "z chwilą wyrzucenia (podniesienia) wyjątku"
+                }
+            },
+            {
+                question: "Jak można wykorzystać gotową klasę?",
+                answers: {
+                    a: "można stworzyć jej instancję – obiekt",
+                    b: "można z niej wywoływać metody statycznie (jeśli je ma)",
+                    c: "można stworzyć z jej wykorzystaniem nową klasę"
+                }
+            },
+            {
+                question: "Jakie są odmiany kompozycji?",
+                answers: {
+                    c: "agregacja i kompozycja właściwa"
+                }
+            },
+            {
+                question: "Opisz schemat wywołania metod komponentów przez metodę kompozytu.",
+                answers: {
+                    c: "bardzo często metody kompozytu napisane są tak, że wywołują w swoim kodzie metody komponentów o tym samym kodzie i parametrach"
+                }
+            },
+            {
+                question: "Czy składowe prywatne (z wyjątkiem konstruktorów i destruktorów) są dziedziczone?",
+                answers: {
+                    c: "tak, ale klasa dziedzicząca nie może z nich bezpośrednio korzystać"
+                }
+            },
+            {
+                question: "Ile konstruktorów wywoła się przy tworzeniu obiektu klasy dziedziczącej?",
+                answers: {
+                    c: "wszystkie konstruktory wszystkich klas bazowych + własny konstruktor klasy tworzonego obiektu"
+                }
+            },
+            {
+                question: "Czy przesłanianie pól w dziedziczeniu jest dobrą i powszechna praktyką?",
+                answers: {
+                    c: "nie, bo zmniejsza to czytelność programu"
+                }
+            },
+            {
+                question: "Kiedy rzutowanie w dół jest bezpieczne?",
+                answers: {
+                    c: "kiedy rzutuje się na bezpośrednią klasę dziedziczącą",
+                    d: "kiedy następuje po wcześniejszym, odpowiednim rzutowaniu w górę"
+                }
+            },
+            {
+                question: "Kiedy można rozpoznać prawdziwy typ obiektu ukrywającego się za referencją/wskaźnikiem?",
+                answers: {
+                    d: "w trakcie wykonania programu"
+                }
+            },
+            {
+                question: "Po co są potrzebne metody abstrakcyjne?",
+                answers: {
+                    d: "żeby zdefiniować interfejs klasy bez definiowania jej implementacji"
+                }
+            },
+            {
+                question: "Kiedy odbywa się późne wiązanie metod?",
+                answers: {
+                    d: "w trakcie wykonania programu"
+                }
+            },
+            {
+                question: "Jaki mechanizm dostarcza wiedzę potrzebną do wiązania późnego?",
+                answers: {
+                    d: "mechanizm RTTI"
+                }
+            },
+            {
+                question: "Które z poniższych zdań poprawnie opisują typ interfejsowy?",
+                answers: {
+                    d: "z typu interfejsowego nie można tworzyć instancji obiektów",
+                    e: "domyślny poziom dostępu dla metod w interfejsie jest publiczny",
+                    f: "w interfejsie można umieszczać pola statyczne"
+                }
+            },
+            {
+                question: "Czy typ interfejsowy może dziedziczyć z typu interfejsowego?",
+                answers: {
+                    d: "tak"
+                }
+            },
+            {
+                question: "W jaki sposób 'catch' określa wyjątki, które przechwytuje?",
+                answers: {
+                    d: "wymienia ich klasę w nawiasach"
+                }
+            },
+            {
+                question: "Dlaczego moduł-zleceniobiorca nie powinien naprawiać błędnych zleceń modułu-zleceniodawcy?",
+                answers: {
+                    d: "ponieważ nie ma pełnej wiedzy, jak naprawić błąd – ma ją tylko zleceniodawca"
+                }
+            },
+            {
+                question: "Jaka jest najlepsza reakcja modułu-zleceniobiorcy na wykryty błąd w zleceniu?",
+                answers: {
+                    d: "poinformowanie o błędzie moduł-zleceniodawcę"
+                }
+            },
+            {
+                question: "Jak oznacza się kompozycję na diagramach klas w UML?",
+                answers: {
+                    d: "rombem (wypełnionym lub nie)"
+                }
+            },
+            {
+                question: "Skąd bierze się nazwa „rzutowanie w górę”?",
+                answers: {
+                    d: "klasa bazowa na diagramach klas UML często jest umieszczana nad klasą potomną"
+                }
+            },
+            {
+                question: "Jak się upewnić, czy rzutowanie w dół jest bezpieczne?",
+                answers: {
+                    d: "wykorzystać mechanizm RTTI (zbadać prawdziwy typ rzutowanego obiektu)"
+                }
+            },
+            {
+                question: "Czy rzutowanie w dół jest zawsze bezpieczne?",
+                answers: {
+                    d: "nie"
+                }
+            },
+            {
+                question: "Do czego służy instrukcja 'throw'?",
+                answers: {
+                    d: "wyrzuca wyjątek"
+                }
+            },
+            {
+                question: "Czy rzutować w górę można między klasami niezwiązanymi relacją dziedziczenia?",
+                answers: {
+                    d: "nie"
+                }
+            },
+            {
+                question: "Na co wskazuje pseudozmienna 'super' w Javie / 'base' w C#?",
+                answers: {
+                    d: "na obiekt klasy bazowej zawarty w obiekcie klasy pochodnej"
+                }
+            },
+            {
+                question: "Jaka jest różnica w użyciu pseudozmiennej 'this' w metodach klasy dziedziczącej i dziedziczonej?",
+                answers: {
+                    d: "co prawda obie mogą wskazywać na ten sam adres, ale w klasie bazowej 'this' ma typ referencji na obiekt klasy bazowej, a w klasie pochodnej – typ referencji na obiekt klasy bazowej"
+                }
+            },
+            {
+                question: "Czy metoda klasy może odwołać się do pola zdefiniowanego w klasie dziedziczącej z niej (pochodnej)?",
+                answers: {
+                    d: "nie"
+                }
+            },
+            {
+                question: "Kiedy można związać metodę?",
+                answers: {
+                    d: "w trakcie kompilacji programu",
+                    e: "w trakcie wykonania programu"
+                }
+            },
+
+
+            
+        ];
+
+        function searchQuestions() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const filteredQuestions = questions.filter(q => q.question.toLowerCase().includes(keyword) || Object.values(q.answers).some(answer => answer.toLowerCase().includes(keyword)));
+            displayQuestions(filteredQuestions);
+        }
+
+        function displayQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            questions.forEach(q => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                const answers = Object.entries(q.answers).map(([key, answer]) => `<br><strong>${key}:</strong> ${answer}`).join('');
+                questionDiv.innerHTML = `<strong>${q.question}</strong>${answers}`;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // Wyświetl wszystkie pytania na start
+        displayQuestions(questions);
+    </script>
+</body>
+</html>
